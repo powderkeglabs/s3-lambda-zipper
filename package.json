@@ -10,7 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.4.7",
-    "bluebird": "^3.4.1",
     "s3-zip": "0.0.7"
   },
   "devDependencies": {
