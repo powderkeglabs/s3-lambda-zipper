@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "clean": "rm -rf dist && mkdir dist",
-    "test": "node test.js"
+    "clean": "rm -rf tmp",
+    "test": "npm run clean && node test.js"
   },
   "author": "",
   "license": "ISC",
