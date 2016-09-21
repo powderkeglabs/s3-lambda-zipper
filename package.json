@@ -7,13 +7,12 @@
     "build": "npm run clean && npm run build-server",
     "build-server": "babel --out-dir ./dist . --ignore=*.spec.js,*.hbs.js --copy-files",
     "clean": "rm -rf dist && mkdir dist",
-    "test": "babel-node --debug test.js"
+    "test": "rm -rf tmp && babel-node --debug test.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.4.7",
-    "easy-zip": "0.0.4"
+    "aws-sdk": "^2.4.7"
   },
   "devDependencies": {
     "archiver": "^1.1.0",

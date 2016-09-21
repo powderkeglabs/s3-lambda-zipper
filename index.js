@@ -1,14 +1,12 @@
 'use strict';
 
-const fs = require('fs');
 const path = require('path');
 const Promise = require('bluebird');
-
-const AWS = require('aws-sdk');
 const mkdirp = require('mkdirp');
 
 const s3Dl = Promise.promisify(require('./get-files'));
 const zipFile = Promise.promisify(require('./write-zip'));
+const upload = Promise.promisify(require('./upload-zip'));
 
 exports.handler = function(event, context, cb) {
 
@@ -24,14 +22,12 @@ exports.handler = function(event, context, cb) {
   const files = event.files;
   const unverifiedFiles = event.unverifiedFiles;
 
-  // const s3 = new AWS.S3();
-
   try {
 
     const timestamp = `${new Date().getTime()}`;
     const tmpDir = path.join(__dirname, '/tmp/', timestamp);
     const tmpDirUnverified = path.join(tmpDir, '/unverified');
-    const destinationFile = path.join(__dirname, `/tmp/${timestamp}_proxies.zip`);
+    const tmpZipFile = path.join(__dirname, `/tmp/${timestamp}_proxies.zip`);
 
     // Create a new temp directory to store the files
     mkdirp(tmpDirUnverified, err => {
@@ -58,9 +54,11 @@ exports.handler = function(event, context, cb) {
 
       // Download the files
       Promise.all(downloads).then(() => {
-        return zipFile(tmpDir, destinationFile);
+        return zipFile(tmpDir, tmpZipFile);
       }).then(() => {
-        console.log('Done zipping');
+        return upload(bucket, outputFile, tmpZipFile);
+      }).then((data) => {
+        console.log('Done', data);
         cb(null, 'test');
       }).catch(err => {
         console.log(err);
@@ -69,22 +67,6 @@ exports.handler = function(event, context, cb) {
 
     });
 
-    // Where to upload file
-    // const s3 = new AWS.S3({params: {Bucket: bucket, Key: outputFile}});
-
-  //   // The files to add to zip
-  //   const body = s3Zip.archive({ region: region, bucket: bucket}, folder, files);
-  //
-  //   // Upload the file
-  //   s3.upload({Body: body}, (err, res) => {
-  //     if (err) {
-  //       console.error(err);
-  //       return cb(err);
-  //     }
-  //     console.log('Uploaded successfully', res);
-  //     cb(null, res);
-  //   });
-  //
   } catch (e) {
     console.error(e);
     cb(e);
