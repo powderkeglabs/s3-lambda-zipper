@@ -6,21 +6,24 @@ const fs = require('fs');
 
 function getFileFromS3(bucket, key, dest, cb) {
 
-  try {
+  const req = s3.getObject({Bucket: bucket, Key: key});
+  const writeStream = fs.createWriteStream(dest);
+  req.createReadStream().pipe(writeStream);
 
-    const outFile = fs.createWriteStream(dest);
+  writeStream.on('close', () => {
+    console.log('done ' + key);
+    cb();
+  });
 
-    s3.getObject({Bucket: bucket, Key: key})
-      .on('httpData', chunk => outFile.write(chunk))
-      .on('httpDone', () => {
-        console.log('done ' + key);
-        outFile.end();
-        cb(dest);
-      })
-      .send();
-  } catch (err) {
+  req.on('error', err => {
     cb(err);
-  }
+    console.log('Error downloading from S3', err);
+  });
+
+  writeStream.on('error', err => {
+    cb(err);
+    console.log('Error writing file', err);
+  });
 
 }
 

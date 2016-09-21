@@ -4,9 +4,9 @@ const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
 
-function zipDirAndWrite(srcDir, cb) {
+function zipDirAndWrite(srcDir, dest, cb) {
 
-  const output = fs.createWriteStream(path.resolve(srcDir + '/zipped_proxies.zip'));
+  const output = fs.createWriteStream(path.resolve(dest));
   const zip = archiver('zip');
 
   // Finializing file write and callback on success

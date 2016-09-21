@@ -10,7 +10,7 @@ const mkdirp = require('mkdirp');
 const s3Dl = Promise.promisify(require('./get-files'));
 const zipFile = Promise.promisify(require('./write-zip'));
 
-exports.handler = async function(event, context, cb) {
+exports.handler = function(event, context, cb) {
 
   // Source and Dest on S3
   const bucket = event.bucket;
@@ -28,56 +28,49 @@ exports.handler = async function(event, context, cb) {
 
   try {
 
-    const tmpDir = path.join(__dirname, '/tmp/' + new Date().getTime());
+    const timestamp = `${new Date().getTime()}`;
+    const tmpDir = path.join(__dirname, '/tmp/', timestamp);
     const tmpDirUnverified = path.join(tmpDir, '/unverified');
+    const destinationFile = path.join(__dirname, `/tmp/${timestamp}_proxies.zip`);
 
     // Create a new temp directory to store the files
-    mkdirp(tmpDirUnverified, async err => {
+    mkdirp(tmpDirUnverified, err => {
 
       if (err) {
         cb(err);
       }
 
+      let downloads = [];
+
       // Download the unverified proxies to their own sub directory
-      const uvDownloaded = await unverifiedFiles.map(async file => {
+      unverifiedFiles.map(file => {
         const key = folder + file;
         const outFile = tmpDirUnverified + '/' + file;
-        return await s3Dl(bucket, key, outFile);
+        downloads.push(s3Dl(bucket, key, outFile));
       });
 
       // Download the verified proxies to the root directory
-      const vDownloaded = await files.map(async file => {
+      files.map(file => {
         const key = folder + file;
         const outFile = tmpDir + '/' + file;
-        return await s3Dl(bucket, key, outFile);
+        downloads.push(s3Dl(bucket, key, outFile));
       });
 
-      await zipFile(tmpDir);
-
-      cb(null, 'test');
+      // Download the files
+      Promise.all(downloads).then(() => {
+        return zipFile(tmpDir, destinationFile);
+      }).then(() => {
+        console.log('Done zipping');
+        cb(null, 'test');
+      }).catch(err => {
+        console.log(err);
+        throw new Error(err);
+      });
 
     });
 
-    // if (!fs.statSync)
-    //
-    //
-    // // Download first set of files
-    // const s3 = new AWS.S3();
-    //
-    // unverifiedFiles.map(file => {
-    //   const key =  folder + file;
-    //   console.log(key);
-    //   const outFile = fs.createWriteStream(path.resolve(__dirname + '/.tmp/' + file));
-    //   s3.getObject({Bucket: bucket, Key: key}).createReadStream().pipe(outFile);
-    // });
-
     // Where to upload file
     // const s3 = new AWS.S3({params: {Bucket: bucket, Key: outputFile}});
-
-
-
-
-
 
   //   // The files to add to zip
   //   const body = s3Zip.archive({ region: region, bucket: bucket}, folder, files);
