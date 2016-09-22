@@ -25,9 +25,9 @@ exports.handler = function(event, context, cb) {
   try {
 
     const timestamp = `${new Date().getTime()}`;
-    const tmpDir = path.join(__dirname, '/tmp/', timestamp);
+    const tmpDir = path.join('/tmp/', timestamp);
     const tmpDirUnverified = path.join(tmpDir, '/unverified');
-    const tmpZipFile = path.join(__dirname, `/tmp/${timestamp}_proxies.zip`);
+    const tmpZipFile = path.join(`/tmp/${timestamp}_proxies.zip`);
 
     // Create a new temp directory to store the files
     mkdirp(tmpDirUnverified, err => {

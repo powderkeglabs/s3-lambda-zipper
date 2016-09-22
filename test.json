@@ -1,0 +1,16 @@
+{
+  "bucket": "test-nodestream",
+  "folder": "test/",
+  "region": "us-east-1",
+  "files": [
+    "test_proxy.pdf",
+    "test_proxy_1.pdf",
+    "test_proxy_2.pdf",
+    "test_proxy_3.pdf"
+  ],
+  "unverifiedFiles": [
+    "unverified_test_proxy.pdf",
+    "unverified_test_proxy_1.pdf"
+  ],
+  "outputFile": "test/processed/output_teststststst.zip"
+}
